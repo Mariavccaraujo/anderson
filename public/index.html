@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestor+ | Gestão do seu negócio</title>
+<style>
+:root{
+  --navy:#1B2A4A;
+  --navy-light:#2C3E63;
+  --amber:#E08A3C;
+  --amber-dark:#C46F27;
+  --paper:#FAF8F4;
+  --card:#FFFFFF;
+  --border:#E7E2D8;
+  --ink:#22262E;
+  --ink-soft:#6B7280;
+  --green:#2F8F5B;
+  --green-bg:#E7F5EC;
+  --amber-bg:#FCEEDD;
+  --blue:#2E6BB4;
+  --blue-bg:#E7F0FA;
+  --red:#C0392B;
+  --red-bg:#FBEAE8;
+  --radius:14px;
+  --shadow:0 1px 2px rgba(27,42,74,.06), 0 1px 8px rgba(27,42,74,.04);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  background:var(--paper);
+  color:var(--ink);
+  min-height:100vh;
+}
+#app{display:flex;min-height:100vh}
+
+/* SIDEBAR (desktop) */
+.sidebar{
+  width:230px;flex-shrink:0;background:var(--navy);color:#fff;
+  display:flex;flex-direction:column;padding:22px 14px;
+}
+.brand{display:flex;align-items:center;gap:10px;padding:0 8px 24px;}
+.brand .logo{width:32px;height:32px;border-radius:9px;background:var(--amber);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:#1B2A4A;}
+.brand span{font-weight:700;font-size:17px;letter-spacing:.2px}
+.nav-item{
+  display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:10px;
+  color:#C7CEDD;font-size:14.5px;cursor:pointer;margin-bottom:2px;transition:.15s;
+  border:none;background:none;text-align:left;width:100%;font-family:inherit;
+}
+.nav-item:hover{background:rgba(255,255,255,.06);color:#fff}
+.nav-item.active{background:var(--amber);color:#1B2A4A;font-weight:600}
+.nav-icon{width:20px;height:20px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.nav-divider{height:1px;background:rgba(255,255,255,.1);margin:12px 4px}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 28px;border-bottom:1px solid var(--border);background:var(--card);
+}
+.topbar h1{font-size:19px;font-weight:700;color:var(--navy)}
+.topbar-sub{font-size:12.5px;color:var(--ink-soft);margin-top:2px}
+.content{flex:1;padding:24px 28px 90px;overflow-y:auto}
+
+/* Mobile nav */
+.mobile-nav{display:none}
+
+/* Buttons */
+.btn{
+  display:inline-flex;align-items:center;gap:7px;padding:10px 16px;border-radius:10px;
+  font-size:14px;font-weight:600;cursor:pointer;border:1px solid var(--border);
+  background:var(--card);color:var(--ink);transition:.15s;font-family:inherit;
+}
+.btn:hover{border-color:var(--navy-light)}
+.btn-primary{background:var(--navy);border-color:var(--navy);color:#fff}
+.btn-primary:hover{background:var(--navy-light)}
+.btn-amber{background:var(--amber);border-color:var(--amber);color:#fff}
+.btn-amber:hover{background:var(--amber-dark)}
+.btn-danger{background:var(--red-bg);border-color:var(--red-bg);color:var(--red)}
+.btn-ghost{border-color:transparent;background:none}
+.btn-sm{padding:6px 11px;font-size:12.5px}
+.btn-full{width:100%;justify-content:center}
+
+/* Cards / grid */
+.grid{display:grid;gap:14px}
+.grid-2{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.grid-4{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px}
+.metric{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px}
+.metric .m-label{font-size:12.5px;color:var(--ink-soft);margin-bottom:6px}
+.metric .m-value{font-size:25px;font-weight:700;color:var(--navy)}
+
+.shortcut{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:18px;cursor:pointer;transition:.15s;display:flex;flex-direction:column;gap:10px;
+}
+.shortcut:hover{border-color:var(--amber);box-shadow:var(--shadow)}
+.shortcut .ico{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.shortcut .label{font-weight:600;font-size:14.5px}
+
+/* List rows */
+.list{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.row{display:flex;align-items:center;justify-content:space-between;padding:15px 18px;border-bottom:1px solid var(--border);gap:12px}
+.row:last-child{border-bottom:none}
+.row:hover{background:#FCFBF9}
+.row-main{min-width:0;flex:1}
+.row-title{font-weight:600;font-size:14.5px}
+.row-sub{font-size:12.5px;color:var(--ink-soft);margin-top:3px}
+.row-right{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.row-actions{display:flex;gap:6px}
+.icon-btn{width:30px;height:30px;border-radius:8px;border:1px solid var(--border);background:var(--card);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--ink-soft)}
+.icon-btn:hover{border-color:var(--navy-light);color:var(--navy)}
+
+.badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600}
+.badge-dot{width:6px;height:6px;border-radius:50%}
+
+/* Empty state */
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;text-align:center;background:var(--card);border:1px solid var(--border);border-radius:var(--radius)}
+.empty .circle{width:76px;height:76px;border-radius:50%;background:var(--paper);display:flex;align-items:center;justify-content:center;font-size:30px;margin-bottom:16px}
+.empty h3{font-size:15.5px;margin-bottom:4px}
+.empty p{font-size:13px;color:var(--ink-soft);margin-bottom:18px}
+
+/* Tabs */
+.tabs{display:flex;gap:4px;background:var(--paper);border:1px solid var(--border);border-radius:10px;padding:4px;margin-bottom:18px;width:fit-content}
+.tab{padding:8px 16px;border-radius:8px;font-size:13.5px;font-weight:600;cursor:pointer;color:var(--ink-soft);border:none;background:none;font-family:inherit}
+.tab.active{background:var(--card);color:var(--navy);box-shadow:var(--shadow)}
+
+/* Forms */
+.field{margin-bottom:13px}
+.field label{display:block;font-size:12.5px;font-weight:600;color:var(--ink-soft);margin-bottom:5px}
+.field input,.field select,.field textarea{
+  width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:9px;
+  font-size:14px;font-family:inherit;background:var(--paper);color:var(--ink);
+}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--amber);background:#fff}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.section-label{font-size:12px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.4px;margin:18px 0 10px}
+.section-label:first-child{margin-top:0}
+
+/* Modal */
+.overlay{position:fixed;inset:0;background:rgba(27,26,20,.4);display:none;align-items:flex-start;justify-content:center;z-index:100;overflow-y:auto;padding:40px 16px}
+.overlay.open{display:flex}
+.modal{background:var(--card);border-radius:16px;width:100%;max-width:480px;padding:0;max-height:none}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border)}
+.modal-head h2{font-size:16.5px;font-weight:700;color:var(--navy)}
+.modal-close{width:30px;height:30px;border-radius:8px;border:none;background:none;font-size:18px;cursor:pointer;color:var(--ink-soft)}
+.modal-close:hover{background:var(--paper)}
+.modal-body{padding:20px 22px}
+.modal-foot{padding:16px 22px;border-top:1px solid var(--border)}
+
+/* Order items builder */
+.item-row{display:flex;gap:8px;align-items:center;padding:10px 0;border-bottom:1px dashed var(--border)}
+.item-row:last-child{border-bottom:none}
+
+/* Utility */
+.flex{display:flex}
+.flex-between{display:flex;align-items:center;justify-content:space-between}
+.mt{margin-top:16px}
+.hidden{display:none !important}
+.total-line{display:flex;justify-content:space-between;padding:10px 0;font-size:14.5px}
+.total-line.grand{font-weight:700;font-size:16.5px;color:var(--navy);border-top:1px solid var(--border);margin-top:6px;padding-top:12px}
+
+@media(max-width:820px){
+  .sidebar{display:none}
+  .content{padding:16px 16px 90px}
+  .topbar{padding:14px 16px}
+  .mobile-nav{
+    display:flex;position:fixed;bottom:0;left:0;right:0;background:var(--card);
+    border-top:1px solid var(--border);padding:8px 4px;z-index:50;justify-content:space-around;
+  }
+  .mnav-item{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10.5px;color:var(--ink-soft);cursor:pointer;padding:4px 8px;border-radius:8px}
+  .mnav-item.active{color:var(--navy);font-weight:700}
+  .mnav-item .mnav-ico{font-size:18px}
+  .grid-4{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="sidebar">
+    <div class="brand"><div class="logo">G+</div><span>Gestor+</span></div>
+    <button class="nav-item active" data-view="inicio"><span class="nav-icon">&#8962;</span>Início</button>
+    <button class="nav-item" data-view="pedidos"><span class="nav-icon">&#128203;</span>Pedidos</button>
+    <button class="nav-item" data-view="agenda"><span class="nav-icon">&#128197;</span>Agenda</button>
+    <button class="nav-item" data-view="financeiro"><span class="nav-icon">&#128176;</span>Financeiro</button>
+    <button class="nav-item" data-view="clientes"><span class="nav-icon">&#128100;</span>Clientes</button>
+    <button class="nav-item" data-view="servicos"><span class="nav-icon">&#128230;</span>Peças e serviços</button>
+    <div class="nav-divider"></div>
+    <div style="padding:10px 12px;font-size:11.5px;color:#8891A8;line-height:1.5">Todos os dados ficam salvos na sua conta e sincronizam automaticamente.</div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <h1 id="pageTitle">Início</h1>
+        <div class="topbar-sub" id="pageSub">Visão geral do seu negócio</div>
+      </div>
+      <div id="topbarAction"></div>
+    </div>
+    <div class="content" id="content"></div>
+  </div>
+</div>
+
+<div class="mobile-nav">
+  <div class="mnav-item active" data-view="inicio"><div class="mnav-ico">&#8962;</div>Início</div>
+  <div class="mnav-item" data-view="pedidos"><div class="mnav-ico">&#128203;</div>Pedidos</div>
+  <div class="mnav-item" data-view="agenda"><div class="mnav-ico">&#128197;</div>Agenda</div>
+  <div class="mnav-item" data-view="financeiro"><div class="mnav-ico">&#128176;</div>Financeiro</div>
+  <div class="mnav-item" data-view="clientes"><div class="mnav-ico">&#128100;</div>Clientes</div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal" id="modal"></div>
+</div>
+
+<script>
+/* ---------- DATA LAYER (persisted via window.storage) ---------- */
+const DB = { clientes:[], servicos:[], pedidos:[], agenda:[], financeiro:[] };
+const KEYS = Object.keys(DB);
+let dbReady = false;
+
+const API = '/api';
+
+function normalizePedido(p){
+  return {
+    id: p.id, clienteId: p.cliente_id, data: p.data, status: p.status, total: p.total,
+    itens: (p.itens||[]).map(it=>({servicoId: it.servico_id, nome: it.nome_item, preco: it.preco_unitario, qtd: it.quantidade}))
+  };
+}
+function normalizeAgenda(a){
+  return { id:a.id, titulo:a.titulo, data:a.data, hora:a.hora, clienteId:a.cliente_id, obs:a.observacoes };
+}
+
+async function loadDB(){
+  for(const k of KEYS){
+    try{
+      const res = await fetch(`${API}/${k}`);
+      let data = res.ok ? await res.json() : [];
+      if(k==='pedidos') data = data.map(normalizePedido);
+      if(k==='agenda') data = data.map(normalizeAgenda);
+      DB[k] = data;
+    }catch(e){ DB[k] = []; }
+  }
+  dbReady = true;
+}
+
+async function apiCreate(table, payload){
+  const res = await fetch(`${API}/${table}`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
+  return res.json();
+}
+async function apiUpdate(table, id, payload){
+  const res = await fetch(`${API}/${table}/${id}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
+  return res.json();
+}
+async function apiDelete(table, id){
+  await fetch(`${API}/${table}/${id}`, { method:'DELETE' });
+}
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+function fmtMoney(v){ return (v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); }
+function fmtDate(d){ if(!d) return '—'; const [y,m,day]=d.split('-'); return `${day}/${m}/${y}`; }
+
+/* ---------- APP STATE / ROUTING ---------- */
+let currentView = 'inicio';
+const views = ['inicio','pedidos','agenda','financeiro','clientes','servicos'];
+const titles = {
+  inicio:['Início','Visão geral do seu negócio'],
+  pedidos:['Pedidos','Organize os pedidos do seu negócio'],
+  agenda:['Agenda','Seus compromissos e horários'],
+  financeiro:['Financeiro','Entradas e saídas do caixa'],
+  clientes:['Clientes','Contatos salvos na nuvem'],
+  servicos:['Peças e serviços','Seu catálogo de itens']
+};
+
+function setActiveNav(view){
+  document.querySelectorAll('.nav-item').forEach(el=>el.classList.toggle('active', el.dataset.view===view));
+  document.querySelectorAll('.mnav-item').forEach(el=>el.classList.toggle('active', el.dataset.view===view));
+}
+function go(view){
+  currentView = view;
+  setActiveNav(view);
+  document.getElementById('pageTitle').textContent = titles[view][0];
+  document.getElementById('pageSub').textContent = titles[view][1];
+  render();
+}
+document.querySelectorAll('[data-view]').forEach(el=>{
+  el.addEventListener('click', ()=>go(el.dataset.view));
+});
+
+function render(){
+  const el = document.getElementById('content');
+  const action = document.getElementById('topbarAction');
+  action.innerHTML = '';
+  if(!dbReady){ el.innerHTML = '<div class="empty"><p>Carregando seus dados…</p></div>'; return; }
+  if(currentView==='inicio') return renderInicio(el, action);
+  if(currentView==='pedidos') return renderPedidos(el, action);
+  if(currentView==='agenda') return renderAgenda(el, action);
+  if(currentView==='financeiro') return renderFinanceiro(el, action);
+  if(currentView==='clientes') return renderClientes(el, action);
+  if(currentView==='servicos') return renderServicos(el, action);
+}
+
+/* ---------- MODAL HELPERS ---------- */
+function openModal(html){
+  document.getElementById('modal').innerHTML = html;
+  document.getElementById('overlay').classList.add('open');
+}
+function closeModal(){ document.getElementById('overlay').classList.remove('open'); }
+document.getElementById('overlay').addEventListener('click', e=>{ if(e.target.id==='overlay') closeModal(); });
+
+/* =========================================================
+   INÍCIO
+========================================================= */
+function renderInicio(el){
+  const pendentes = DB.pedidos.filter(p=>p.status!=='Concluído').length;
+  const receitas = DB.financeiro.filter(f=>f.tipo==='Receita').reduce((s,f)=>s+Number(f.valor),0);
+  const despesas = DB.financeiro.filter(f=>f.tipo==='Despesa').reduce((s,f)=>s+Number(f.valor),0);
+  const hoje = new Date().toISOString().slice(0,10);
+  const compromissosHoje = DB.agenda.filter(a=>a.data===hoje).length;
+
+  el.innerHTML = `
+    <div class="grid grid-4" style="margin-bottom:22px">
+      <div class="metric"><div class="m-label">Pedidos em aberto</div><div class="m-value">${pendentes}</div></div>
+      <div class="metric"><div class="m-label">Compromissos hoje</div><div class="m-value">${compromissosHoje}</div></div>
+      <div class="metric"><div class="m-label">Total recebido</div><div class="m-value" style="color:var(--green)">${fmtMoney(receitas)}</div></div>
+      <div class="metric"><div class="m-label">Total gasto</div><div class="m-value" style="color:var(--red)">${fmtMoney(despesas)}</div></div>
+    </div>
+    <div class="section-label">Atalhos</div>
+    <div class="grid grid-4">
+      <div class="shortcut" data-go="pedidos"><div class="ico" style="background:var(--blue-bg);color:var(--blue)">&#128203;</div><div class="label">Novo pedido</div></div>
+      <div class="shortcut" data-go="agenda"><div class="ico" style="background:var(--amber-bg);color:var(--amber-dark)">&#128197;</div><div class="label">Novo compromisso</div></div>
+      <div class="shortcut" data-go="financeiro"><div class="ico" style="background:var(--green-bg);color:var(--green)">&#128176;</div><div class="label">Novo lançamento</div></div>
+      <div class="shortcut" data-go="clientes"><div class="ico" style="background:var(--red-bg);color:var(--red)">&#128100;</div><div class="label">Novo cliente</div></div>
+    </div>
+  `;
+  el.querySelectorAll('[data-go]').forEach(c=>c.addEventListener('click',()=>go(c.dataset.go)));
+}
+
+/* =========================================================
+   CLIENTES
+========================================================= */
+function renderClientes(el, action){
+  action.innerHTML = `<button class="btn btn-primary" id="btnNovoCliente">+ novo cliente</button>`;
+  action.querySelector('#btnNovoCliente').onclick = ()=>openClienteForm();
+
+  if(DB.clientes.length===0){
+    el.innerHTML = `<div class="empty"><div class="circle">&#128100;</div><h3>Salve os contatos dos seus clientes</h3><p>Eles ficam guardados na nuvem, então você não vai perdê-los.</p><button class="btn btn-primary" id="emptyBtn">+ novo cliente</button></div>`;
+    el.querySelector('#emptyBtn').onclick = ()=>openClienteForm();
+    return;
+  }
+  el.innerHTML = `<div class="list">${DB.clientes.map(c=>`
+    <div class="row">
+      <div class="row-main">
+        <div class="row-title">${c.nome}</div>
+        <div class="row-sub">${c.tipo}${c.telefone? ' · '+c.telefone:''}${c.email? ' · '+c.email:''}</div>
+      </div>
+      <div class="row-actions">
+        <button class="icon-btn" data-edit="${c.id}">&#9998;</button>
+        <button class="icon-btn" data-del="${c.id}">&#128465;</button>
+      </div>
+    </div>`).join('')}</div>`;
+  el.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>openClienteForm(b.dataset.edit));
+  el.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>delItem('clientes', b.dataset.del, renderClientes.bind(null, el, action)));
+}
+
+function openClienteForm(id){
+  const c = id ? DB.clientes.find(x=>x.id===id) : {tipo:'Pessoa física'};
+  openModal(`
+    <div class="modal-head"><h2>${id?'Editar cliente':'Novo cliente'}</h2><button class="modal-close" onclick="closeModal()">&times;</button></div>
+    <div class="modal-body">
+      <div class="field"><label>Nome</label><input id="f_nome" value="${c.nome||''}" placeholder="Nome do cliente"></div>
+      <div class="field-row">
+        <div class="field"><label>Tipo</label><select id="f_tipo">
+          <option ${c.tipo==='Pessoa física'?'selected':''}>Pessoa física</option>
+          <option ${c.tipo==='Pessoa jurídica'?'selected':''}>Pessoa jurídica</option>
+        </select></div>
+        <div class="field"><label>CPF/CNPJ</label><input id="f_doc" value="${c.documento||''}"></div>
+      </div>
+      <div class="section-label">Contato</div>
+      <div class="field-row">
+        <div class="field"><label>E-mail</label><input id="f_email" value="${c.email||''}"></div>
+        <div class="field"><label>Telefone</label><input id="f_telefone" value="${c.telefone||''}"></div>
+      </div>
+      <div class="section-label">Endereço</div>
+      <div class="field-row">
+        <div class="field"><label>CEP</label><input id="f_cep" value="${c.cep||''}"></div>
+        <div class="field"><label>Cidade</label><input id="f_cidade" value="${c.cidade||''}"></div>
+      </div>
+      <div class="field"><label>Logradouro</label><input id="f_logradouro" value="${c.logradouro||''}"></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-primary btn-full" id="saveCliente">salvar cliente</button></div>
+  `);
+  document.getElementById('saveCliente').onclick = async ()=>{
+    const nome = document.getElementById('f_nome').value.trim();
+    if(!nome){ alert('Informe o nome do cliente.'); return; }
+    const payload = {
+      nome, tipo: document.getElementById('f_tipo').value,
+      documento: document.getElementById('f_doc').value,
+      email: document.getElementById('f_email').value,
+      telefone: document.getElementById('f_telefone').value,
+      cep: document.getElementById('f_cep').value,
+      cidade: document.getElementById('f_cidade').value,
+      logradouro: document.getElementById('f_logradouro').value,
+    };
+    const saved = id ? await apiUpdate('clientes', id, payload) : await apiCreate('clientes', payload);
+    if(id){ const i=DB.clientes.findIndex(x=>x.id===id); DB.clientes[i]=saved; }
+    else DB.clientes.push(saved);
+    closeModal(); render();
+  };
+}
+
+/* =========================================================
+   SERVIÇOS / PEÇAS
+========================================================= */
+function renderServicos(el, action){
+  action.innerHTML = `<button class="btn btn-primary" id="btnNovoServico">+ cadastrar item</button>`;
+  action.querySelector('#btnNovoServico').onclick = ()=>openServicoForm();
+
+  if(DB.servicos.length===0){
+    el.innerHTML = `<div class="empty"><div class="circle">&#128230;</div><h3>Crie seu próprio catálogo</h3><p>Cadastre peças e serviços para economizar tempo nos pedidos.</p><button class="btn btn-primary" id="emptyBtn">+ cadastrar item</button></div>`;
+    el.querySelector('#emptyBtn').onclick = ()=>openServicoForm();
+    return;
+  }
+  el.innerHTML = `<div class="list">${DB.servicos.map(s=>`
+    <div class="row">
+      <div class="row-main"><div class="row-title">${s.nome}</div><div class="row-sub">${s.detalhes||''}</div></div>
+      <div class="row-right">
+        <div style="text-align:right"><div class="row-title">${fmtMoney(s.preco)}</div><div class="row-sub">${s.unidade||'un'}</div></div>
+        <div class="row-actions">
+          <button class="icon-btn" data-edit="${s.id}">&#9998;</button>
+          <button class="icon-btn" data-del="${s.id}">&#128465;</button>
+        </div>
+      </div>
+    </div>`).join('')}</div>`;
+  el.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>openServicoForm(b.dataset.edit));
+  el.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>delItem('servicos', b.dataset.del, renderServicos.bind(null, el, action)));
+}
+
+function openServicoForm(id){
+  const s = id ? DB.servicos.find(x=>x.id===id) : {};
+  openModal(`
+    <div class="modal-head"><h2>${id?'Editar item':'Novo item'}</h2><button class="modal-close" onclick="closeModal()">&times;</button></div>
+    <div class="modal-body">
+      <div class="field"><label>Descrição</label><input id="f_nome" value="${s.nome||''}" placeholder="Descreva o serviço ou peça"></div>
+      <div class="field"><label>Detalhes (opcional)</label><input id="f_detalhes" value="${s.detalhes||''}"></div>
+      <div class="section-label">Preço e quantidade</div>
+      <div class="field-row">
+        <div class="field"><label>Preço unitário (R$)</label><input id="f_preco" type="number" step="0.01" value="${s.preco||''}"></div>
+        <div class="field"><label>Unidade de medida</label><input id="f_unidade" value="${s.unidade||'un'}" placeholder="un, hora, m²..."></div>
+      </div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-primary btn-full" id="saveServico">salvar item</button></div>
+  `);
+  document.getElementById('saveServico').onclick = async ()=>{
+    const nome = document.getElementById('f_nome').value.trim();
+    if(!nome){ alert('Descreva o serviço ou peça.'); return; }
+    const payload = {
+      nome,
+      detalhes: document.getElementById('f_detalhes').value,
+      preco: parseFloat(document.getElementById('f_preco').value)||0,
+      unidade: document.getElementById('f_unidade').value || 'un'
+    };
+    const saved = id ? await apiUpdate('servicos', id, payload) : await apiCreate('servicos', payload);
+    if(id){ const i=DB.servicos.findIndex(x=>x.id===id); DB.servicos[i]=saved; }
+    else DB.servicos.push(saved);
+    closeModal(); render();
+  };
+}
+
+/* =========================================================
+   PEDIDOS
+========================================================= */
+const STATUS_LIST = ['Pendente','Aguardando aprovação','Aprovado','Em andamento','Aguardando pagamento','Enviado','Concluído'];
+const STATUS_COLOR = {
+  'Pendente':'#C46F27','Aguardando aprovação':'#C46F27','Aprovado':'#2E6BB4','Em andamento':'#2E6BB4',
+  'Aguardando pagamento':'#2E6BB4','Enviado':'#2E6BB4','Concluído':'#2F8F5B'
+};
+let pedidosTab = 'todos';
+
+function renderPedidos(el, action){
+  action.innerHTML = `<button class="btn btn-primary" id="btnNovoPedido">+ novo pedido</button>`;
+  action.querySelector('#btnNovoPedido').onclick = ()=>openPedidoForm();
+
+  let html = `<div class="tabs">
+    <button class="tab ${pedidosTab==='todos'?'active':''}" data-tab="todos">Todos os pedidos</button>
+    <button class="tab ${pedidosTab==='status'?'active':''}" data-tab="status">Por status</button>
+  </div>`;
+
+  if(pedidosTab==='status'){
+    html += `<div class="list">${STATUS_LIST.map(st=>{
+      const count = DB.pedidos.filter(p=>p.status===st).length;
+      return `<div class="row"><div class="row-main"><span class="badge-dot" style="background:${STATUS_COLOR[st]};display:inline-block;margin-right:8px"></span>${st}</div><div class="row-sub">${count}</div></div>`;
+    }).join('')}</div>`;
+  } else if(DB.pedidos.length===0){
+    html += `<div class="empty"><div class="circle">&#128203;</div><h3>Comece salvando um pedido</h3><p>Organize seu negócio aqui!</p><button class="btn btn-primary" id="emptyBtn">+ novo pedido</button></div>`;
+  } else {
+    html += `<div class="list">${DB.pedidos.slice().reverse().map(p=>{
+      const cliente = DB.clientes.find(c=>c.id===p.clienteId);
+      return `<div class="row">
+        <div class="row-main">
+          <div class="row-title">${cliente?cliente.nome:'Sem cliente'} · ${fmtMoney(p.total)}</div>
+          <div class="row-sub">${fmtDate(p.data)} · ${p.itens.length} item(ns)</div>
+        </div>
+        <div class="row-right">
+          <span class="badge" style="background:${STATUS_COLOR[p.status]}22;color:${STATUS_COLOR[p.status]}">${p.status}</span>
+          <div class="row-actions">
+            <button class="icon-btn" data-edit="${p.id}">&#9998;</button>
+            <button class="icon-btn" data-del="${p.id}">&#128465;</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('')}</div>`;
+  }
+  el.innerHTML = html;
+  el.querySelectorAll('[data-tab]').forEach(t=>t.onclick=()=>{ pedidosTab=t.dataset.tab; render(); });
+  const eb = el.querySelector('#emptyBtn'); if(eb) eb.onclick=()=>openPedidoForm();
+  el.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>openPedidoForm(b.dataset.edit));
+  el.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>delItem('pedidos', b.dataset.del, render));
+}
+
+let pedidoItensDraft = [];
+function openPedidoForm(id){
+  const p = id ? DB.pedidos.find(x=>x.id===id) : null;
+  pedidoItensDraft = p ? JSON.parse(JSON.stringify(p.itens)) : [];
+  if(DB.clientes.length===0){ alert('Cadastre um cliente antes de criar um pedido.'); return; }
+  if(DB.servicos.length===0){ alert('Cadastre ao menos um serviço ou peça antes de criar um pedido.'); return; }
+
+  openModal(`
+    <div class="modal-head"><h2>${id?'Editar pedido':'Novo pedido'}</h2><button class="modal-close" onclick="closeModal()">&times;</button></div>
+    <div class="modal-body">
+      <div class="field"><label>Cliente</label><select id="f_cliente">
+        ${DB.clientes.map(c=>`<option value="${c.id}" ${p&&p.clienteId===c.id?'selected':''}>${c.nome}</option>`).join('')}
+      </select></div>
+      <div class="field-row">
+        <div class="field"><label>Data</label><input id="f_data" type="date" value="${p?p.data:new Date().toISOString().slice(0,10)}"></div>
+        <div class="field"><label>Status</label><select id="f_status">${STATUS_LIST.map(s=>`<option ${p&&p.status===s?'selected':''}>${s}</option>`).join('')}</select></div>
+      </div>
+      <div class="section-label">Itens do pedido</div>
+      <div class="field">
+        <select id="f_addItem">
+          <option value="">Adicionar peça/serviço...</option>
+          ${DB.servicos.map(s=>`<option value="${s.id}">${s.nome} · ${fmtMoney(s.preco)}</option>`).join('')}
+        </select>
+      </div>
+      <div id="itensList"></div>
+      <div id="totais"></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-primary btn-full" id="savePedido">salvar pedido</button></div>
+  `);
+  renderItensDraft();
+  document.getElementById('f_addItem').onchange = (e)=>{
+    const sid = e.target.value; if(!sid) return;
+    const serv = DB.servicos.find(s=>s.id===sid);
+    const existing = pedidoItensDraft.find(i=>i.servicoId===sid);
+    if(existing) existing.qtd += 1;
+    else pedidoItensDraft.push({servicoId:sid, nome:serv.nome, preco:serv.preco, qtd:1});
+    e.target.value='';
+    renderItensDraft();
+  };
+  document.getElementById('savePedido').onclick = async ()=>{
+    if(pedidoItensDraft.length===0){ alert('Adicione ao menos um item ao pedido.'); return; }
+    const payload = {
+      cliente_id: document.getElementById('f_cliente').value,
+      data: document.getElementById('f_data').value,
+      status: document.getElementById('f_status').value,
+      itens: pedidoItensDraft.map(it=>({servico_id:it.servicoId, nome_item:it.nome, preco_unitario:it.preco, quantidade:it.qtd}))
+    };
+    const saved = normalizePedido(id ? await apiUpdate('pedidos', id, payload) : await apiCreate('pedidos', payload));
+    if(id){ const i=DB.pedidos.findIndex(x=>x.id===id); DB.pedidos[i]=saved; }
+    else DB.pedidos.push(saved);
+    closeModal(); render();
+  };
+}
+function renderItensDraft(){
+  const box = document.getElementById('itensList');
+  box.innerHTML = pedidoItensDraft.map((i,idx)=>`
+    <div class="item-row">
+      <div style="flex:1;font-size:13.5px">${i.nome}</div>
+      <input type="number" min="1" value="${i.qtd}" style="width:56px;padding:6px;border:1px solid var(--border);border-radius:8px" data-qty="${idx}">
+      <div style="width:80px;text-align:right;font-size:13.5px">${fmtMoney(i.preco*i.qtd)}</div>
+      <button class="icon-btn" data-rm="${idx}">&#128465;</button>
+    </div>`).join('');
+  box.querySelectorAll('[data-qty]').forEach(inp=>inp.onchange=()=>{
+    pedidoItensDraft[inp.dataset.qty].qtd = Math.max(1, parseInt(inp.value)||1);
+    renderItensDraft();
+  });
+  box.querySelectorAll('[data-rm]').forEach(btn=>btn.onclick=()=>{
+    pedidoItensDraft.splice(btn.dataset.rm,1); renderItensDraft();
+  });
+  const total = pedidoItensDraft.reduce((s,i)=>s+i.preco*i.qtd,0);
+  document.getElementById('totais').innerHTML = `<div class="total-line grand"><span>Total</span><span>${fmtMoney(total)}</span></div>`;
+}
+
+/* =========================================================
+   AGENDA
+========================================================= */
+function renderAgenda(el, action){
+  action.innerHTML = `<button class="btn btn-primary" id="btnNovoComp">+ novo compromisso</button>`;
+  action.querySelector('#btnNovoComp').onclick = ()=>openAgendaForm();
+
+  if(DB.agenda.length===0){
+    el.innerHTML = `<div class="empty"><div class="circle">&#128197;</div><h3>Agendar um compromisso</h3><p>É super fácil organizar sua rotina de trabalho!</p><button class="btn btn-primary" id="emptyBtn">+ novo compromisso</button></div>`;
+    el.querySelector('#emptyBtn').onclick = ()=>openAgendaForm();
+    return;
+  }
+  const sorted = DB.agenda.slice().sort((a,b)=>(a.data+a.hora).localeCompare(b.data+b.hora));
+  el.innerHTML = `<div class="list">${sorted.map(a=>{
+    const cliente = DB.clientes.find(c=>c.id===a.clienteId);
+    return `<div class="row">
+      <div class="row-main">
+        <div class="row-title">${a.titulo}</div>
+        <div class="row-sub">${fmtDate(a.data)} · ${a.hora||'--:--'}${cliente?' · '+cliente.nome:''}</div>
+      </div>
+      <div class="row-actions">
+        <button class="icon-btn" data-edit="${a.id}">&#9998;</button>
+        <button class="icon-btn" data-del="${a.id}">&#128465;</button>
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+  el.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>openAgendaForm(b.dataset.edit));
+  el.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>delItem('agenda', b.dataset.del, render));
+}
+
+function openAgendaForm(id){
+  const a = id ? DB.agenda.find(x=>x.id===id) : {};
+  openModal(`
+    <div class="modal-head"><h2>${id?'Editar compromisso':'Novo compromisso'}</h2><button class="modal-close" onclick="closeModal()">&times;</button></div>
+    <div class="modal-body">
+      <div class="field"><label>Título</label><input id="f_titulo" value="${a.titulo||''}" placeholder="Ex: visita técnica"></div>
+      <div class="field-row">
+        <div class="field"><label>Data</label><input id="f_data" type="date" value="${a.data||new Date().toISOString().slice(0,10)}"></div>
+        <div class="field"><label>Hora</label><input id="f_hora" type="time" value="${a.hora||''}"></div>
+      </div>
+      <div class="field"><label>Cliente (opcional)</label><select id="f_cliente">
+        <option value="">Nenhum</option>
+        ${DB.clientes.map(c=>`<option value="${c.id}" ${a.clienteId===c.id?'selected':''}>${c.nome}</option>`).join('')}
+      </select></div>
+      <div class="field"><label>Observações</label><textarea id="f_obs" rows="3">${a.obs||''}</textarea></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-primary btn-full" id="saveAgenda">salvar compromisso</button></div>
+  `);
+  document.getElementById('saveAgenda').onclick = async ()=>{
+    const titulo = document.getElementById('f_titulo').value.trim();
+    if(!titulo){ alert('Dê um título ao compromisso.'); return; }
+    const payload = {
+      titulo,
+      data: document.getElementById('f_data').value,
+      hora: document.getElementById('f_hora').value,
+      cliente_id: document.getElementById('f_cliente').value || null,
+      observacoes: document.getElementById('f_obs').value
+    };
+    const saved = normalizeAgenda(id ? await apiUpdate('agenda', id, payload) : await apiCreate('agenda', payload));
+    if(id){ const i=DB.agenda.findIndex(x=>x.id===id); DB.agenda[i]=saved; }
+    else DB.agenda.push(saved);
+    closeModal(); render();
+  };
+}
+
+/* =========================================================
+   FINANCEIRO
+========================================================= */
+function renderFinanceiro(el, action){
+  action.innerHTML = `<button class="btn btn-primary" id="btnNovoLanc">+ novo lançamento</button>`;
+  action.querySelector('#btnNovoLanc').onclick = ()=>openFinanceiroForm();
+
+  const receitas = DB.financeiro.filter(f=>f.tipo==='Receita').reduce((s,f)=>s+Number(f.valor),0);
+  const despesas = DB.financeiro.filter(f=>f.tipo==='Despesa').reduce((s,f)=>s+Number(f.valor),0);
+  let html = `<div class="grid grid-4" style="margin-bottom:20px">
+    <div class="metric"><div class="m-label">Entradas</div><div class="m-value" style="color:var(--green)">${fmtMoney(receitas)}</div></div>
+    <div class="metric"><div class="m-label">Saídas</div><div class="m-value" style="color:var(--red)">${fmtMoney(despesas)}</div></div>
+    <div class="metric"><div class="m-label">Saldo</div><div class="m-value">${fmtMoney(receitas-despesas)}</div></div>
+  </div>`;
+
+  if(DB.financeiro.length===0){
+    html += `<div class="empty"><div class="circle">&#128176;</div><h3>Registre entradas e saídas</h3><p>Acompanhe o financeiro do seu negócio em um só lugar.</p><button class="btn btn-primary" id="emptyBtn">+ novo lançamento</button></div>`;
+  } else {
+    html += `<div class="list">${DB.financeiro.slice().reverse().map(f=>`
+      <div class="row">
+        <div class="row-main">
+          <div class="row-title">${f.descricao}</div>
+          <div class="row-sub">${fmtDate(f.data)} · ${f.categoria||'Sem categoria'}</div>
+        </div>
+        <div class="row-right">
+          <div class="row-title" style="color:${f.tipo==='Receita'?'var(--green)':'var(--red)'}">${f.tipo==='Receita'?'+':'-'} ${fmtMoney(f.valor)}</div>
+          <div class="row-actions">
+            <button class="icon-btn" data-edit="${f.id}">&#9998;</button>
+            <button class="icon-btn" data-del="${f.id}">&#128465;</button>
+          </div>
+        </div>
+      </div>`).join('')}</div>`;
+  }
+  el.innerHTML = html;
+  const eb = el.querySelector('#emptyBtn'); if(eb) eb.onclick=()=>openFinanceiroForm();
+  el.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>openFinanceiroForm(b.dataset.edit));
+  el.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>delItem('financeiro', b.dataset.del, render));
+}
+
+function openFinanceiroForm(id){
+  const f = id ? DB.financeiro.find(x=>x.id===id) : {tipo:'Receita'};
+  openModal(`
+    <div class="modal-head"><h2>${id?'Editar lançamento':'Novo lançamento'}</h2><button class="modal-close" onclick="closeModal()">&times;</button></div>
+    <div class="modal-body">
+      <div class="field"><label>Tipo</label><select id="f_tipo">
+        <option ${f.tipo==='Receita'?'selected':''}>Receita</option>
+        <option ${f.tipo==='Despesa'?'selected':''}>Despesa</option>
+      </select></div>
+      <div class="field"><label>Descrição</label><input id="f_desc" value="${f.descricao||''}" placeholder="Ex: pagamento do pedido #1"></div>
+      <div class="field-row">
+        <div class="field"><label>Valor (R$)</label><input id="f_valor" type="number" step="0.01" value="${f.valor||''}"></div>
+        <div class="field"><label>Data</label><input id="f_data" type="date" value="${f.data||new Date().toISOString().slice(0,10)}"></div>
+      </div>
+      <div class="field"><label>Categoria</label><input id="f_cat" value="${f.categoria||''}" placeholder="Ex: material, mão de obra..."></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-primary btn-full" id="saveFin">salvar lançamento</button></div>
+  `);
+  document.getElementById('saveFin').onclick = async ()=>{
+    const descricao = document.getElementById('f_desc').value.trim();
+    const valor = parseFloat(document.getElementById('f_valor').value);
+    if(!descricao || !valor){ alert('Preencha a descrição e o valor.'); return; }
+    const payload = {
+      tipo: document.getElementById('f_tipo').value,
+      descricao, valor,
+      data: document.getElementById('f_data').value,
+      categoria: document.getElementById('f_cat').value,
+      pedido_id: null
+    };
+    const saved = id ? await apiUpdate('financeiro', id, payload) : await apiCreate('financeiro', payload);
+    if(id){ const i=DB.financeiro.findIndex(x=>x.id===id); DB.financeiro[i]=saved; }
+    else DB.financeiro.push(saved);
+    closeModal(); render();
+  };
+}
+
+/* ---------- DELETE ---------- */
+async function delItem(key, id, cb){
+  if(!confirm('Excluir este item?')) return;
+  await apiDelete(key, id);
+  DB[key] = DB[key].filter(x=>x.id!==id);
+  render();
+}
+
+/* ---------- INIT ---------- */
+(async function init(){
+  await loadDB();
+  render();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "name": "gestor-plus",
+  "version": "1.0.0",
+  "description": "Gestor+ com banco de dados SQLite real",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}

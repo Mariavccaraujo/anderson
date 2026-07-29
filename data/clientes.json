@@ -1,0 +1,18 @@
+[
+  {
+    "id": "cli_001",
+    "nome": "Maria Souza",
+    "tipo": "Pessoa física",
+    "documento": "000.000.000-00",
+    "email": "maria@email.com",
+    "telefone": "(84) 99999-0001",
+    "cep": "",
+    "logradouro": "",
+    "numero": "",
+    "complemento": "",
+    "bairro": "",
+    "cidade": "Natal",
+    "estado": "RN",
+    "criado_em": "2026-07-28T12:00:00Z"
+  }
+]

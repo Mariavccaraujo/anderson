@@ -1,0 +1,11 @@
+[
+  {
+    "id": "agd_001",
+    "titulo": "Visita técnica",
+    "data": "2026-07-29",
+    "hora": "14:00",
+    "cliente_id": "cli_001",
+    "observacoes": "",
+    "criado_em": "2026-07-28T12:00:00Z"
+  }
+]
