@@ -1,67 +1,34 @@
-# Gestor+ (com banco de dados de verdade)
+# Gestor+ (versão 100% GitHub Pages, sem servidor)
 
-Agora o site tem um **backend Node.js com banco SQLite real** por trás — não é mais só o navegador guardando dados. Isso quer dizer que os dados ficam salvos em um arquivo `gestor.db` no servidor, e qualquer pessoa acessando esse mesmo servidor vê os mesmos dados.
+Esse app agora funciona **inteiramente dentro do navegador**, sem precisar de nenhum servidor rodando por trás. Os dados (clientes, pedidos, agenda, etc.) ficam salvos no **armazenamento local do navegador** (`localStorage`), no aparelho onde você está usando o site.
 
-## O que tem aqui
+Isso significa: dá pra publicar direto no **GitHub Pages**, de graça, sem configurar mais nada.
+
+## O que importa aqui
 
 ```
-server.js       -> o backend (API + serve o site)
-schema.sql       -> estrutura do banco (tabelas, relações, triggers)
-package.json      -> dependências
-data/               -> dados de exemplo usados só na primeira vez que o banco é criado
-public/
-  index.html          -> o site (agora conversa com a API em vez do navegador)
+public/index.html   -> o app inteiro (HTML + CSS + JS + dados), é só isso que precisa ir pro ar
 ```
 
-Ao rodar pela primeira vez, o servidor cria automaticamente o arquivo `gestor.db` a partir do `schema.sql` e o popula com os dados de exemplo da pasta `data/`. Da próxima vez que você rodar, ele já reaproveita esse `gestor.db`.
+Os arquivos `server.js`, `schema.sql`, `package.json` e a pasta `data/` são de uma versão anterior que usava um servidor Node.js — foram deixados aqui só de referência, mas **você não precisa deles pra publicar no GitHub Pages**.
 
-## Como rodar no VS Code
+## Publicando no GitHub Pages
 
-**Pré-requisito:** Node.js 22.5 ou mais novo (esse projeto usa o módulo `node:sqlite`, nativo do Node, então não precisa instalar nenhum banco separado). Confira sua versão:
+1. No seu repositório do GitHub (o que já existe, `anderson`), coloque o arquivo `public/index.html` na **raiz do repositório** e renomeie para `index.html` (ou configure o GitHub Pages pra servir a partir da pasta `public`, em Settings → Pages → Branch → escolher a pasta).
+2. Vá em **Settings → Pages** no repositório, confirme que está publicando a partir da branch e pasta certas.
+3. Acesse `mariavccaraujo.github.io/anderson/` — pronto, o app carrega e já funciona, incluindo salvar clientes, pedidos, etc.
 
-```bash
-node --version
+## Importante: onde os dados ficam salvos
+
+- Os dados ficam guardados **só no navegador que você usou pra cadastrar**. Se você abrir o mesmo link em outro celular ou computador, ele começa vazio (com os dados de exemplo iniciais) — não é uma nuvem compartilhada entre aparelhos.
+- Se você limpar os dados de navegação / cache do navegador, ou usar aba anônima, os dados somem.
+- Pra ter um "backup", dá pra exportar os dados eventualmente (me avisa se quiser esse recurso).
+- Se um dia você precisar que os dados fiquem **sincronizados entre vários aparelhos/pessoas**, aí sim vai ser necessário algum tipo de banco online — é só falar comigo que eu adapto.
+
+## Zerar os dados
+
+Abra o Console do navegador (F12) na página do app e rode:
+```js
+localStorage.clear()
 ```
-
-**Passo a passo:**
-
-1. Abra a pasta `gestor-plus` no VS Code
-2. Abra o terminal integrado (`` Ctrl+` ``)
-3. Instale as dependências:
-   ```bash
-   npm install
-   ```
-4. Suba o servidor:
-   ```bash
-   npm start
-   ```
-5. Você vai ver:
-   ```
-   Gestor+ rodando em http://localhost:3000
-   ```
-6. Abra `http://localhost:3000` no navegador.
-
-Pronto — agora o site lê e grava direto no banco SQLite (`gestor.db`), pela API do próprio servidor. Cadastre um cliente, feche o navegador, abra de novo: os dados continuam lá, porque estão no arquivo do banco, não no navegador.
-
-## Ver os dados direto no banco (opcional)
-
-Se quiser inspecionar o `gestor.db` diretamente, instale a extensão **SQLite Viewer** no VS Code e abra o arquivo `gestor.db` gerado na raiz do projeto depois de rodar o servidor pela primeira vez.
-
-## Zerar o banco
-
-Pare o servidor e apague o arquivo `gestor.db`. Na próxima vez que rodar `npm start`, ele recria tudo do zero com os dados de exemplo.
-
-```bash
-rm gestor.db
-npm start
-```
-
-## Como funciona por baixo dos panos
-
-- O `server.js` sobe um servidor **Express** que serve o `public/index.html` e expõe uma API REST em `/api/clientes`, `/api/servicos`, `/api/pedidos`, `/api/agenda` e `/api/financeiro` (GET, POST, PUT, DELETE).
-- O banco é **SQLite**, acessado pelo módulo `node:sqlite`, nativo do Node — sem instalar driver externo.
-- O `schema.sql` define as tabelas com chaves estrangeiras (ex: um pedido pertence a um cliente) e um trigger que recalcula automaticamente o total do pedido sempre que um item é adicionado, editado ou removido.
-
-## Publicar de verdade (fora do seu computador)
-
-Pra deixar isso acessível pela internet (não só em `localhost`), você pode hospedar em serviços como **Render**, **Railway** ou **Fly.io**, que rodam projetos Node.js gratuitamente em planos básicos. O código já está pronto pra isso — não precisa mudar nada, só configurar o deploy no serviço escolhido. Me avisa se quiser ajuda com esse passo.
+Depois recarregue a página — ele volta pros dados de exemplo iniciais.
