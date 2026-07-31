@@ -77,6 +77,17 @@ CREATE TABLE financeiro (
   criado_em     TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
+-- ---------- RECIBOS ----------
+CREATE TABLE recibos (
+  id                TEXT PRIMARY KEY,
+  cliente_id        TEXT REFERENCES clientes(id) ON DELETE SET NULL,
+  descricao         TEXT NOT NULL,
+  valor             REAL NOT NULL,
+  data              TEXT NOT NULL,
+  forma_pagamento   TEXT,
+  criado_em         TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
 -- ---------- ÍNDICES ----------
 CREATE INDEX idx_pedidos_cliente     ON pedidos(cliente_id);
 CREATE INDEX idx_pedidos_status      ON pedidos(status);
@@ -85,6 +96,7 @@ CREATE INDEX idx_agenda_data         ON agenda(data);
 CREATE INDEX idx_agenda_cliente      ON agenda(cliente_id);
 CREATE INDEX idx_financeiro_data     ON financeiro(data);
 CREATE INDEX idx_financeiro_tipo     ON financeiro(tipo);
+CREATE INDEX idx_recibos_cliente     ON recibos(cliente_id);
 
 -- ---------- TRIGGER: mantém pedidos.total sincronizado com os itens ----------
 CREATE TRIGGER trg_itens_insert AFTER INSERT ON pedido_itens

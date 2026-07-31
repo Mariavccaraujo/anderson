@@ -40,6 +40,10 @@ function seedFromJSON() {
 
   const insFin = db.prepare(`INSERT INTO financeiro (id,tipo,descricao,valor,data,categoria,pedido_id) VALUES (?,?,?,?,?,?,?)`);
   for (const f of financeiro) insFin.run(f.id, f.tipo, f.descricao, f.valor, f.data, f.categoria||'', f.pedido_id||null);
+
+  const recibos = JSON.parse(fs.readFileSync(path.join(dataDir, 'recibos.json')));
+  const insRecibo = db.prepare(`INSERT INTO recibos (id,cliente_id,descricao,valor,data,forma_pagamento) VALUES (?,?,?,?,?,?)`);
+  for (const r of recibos) insRecibo.run(r.id, r.cliente_id||null, r.descricao, r.valor, r.data, r.forma_pagamento||'');
 }
 
 const app = express();
@@ -53,29 +57,50 @@ function simpleCrud(table, cols) {
   const placeholders = cols.map(() => '?').join(',');
 
   app.get(`/api/${table}`, (req, res) => {
-    const rows = db.prepare(`SELECT * FROM ${table} ORDER BY criado_em`).all();
-    res.json(rows);
+    try {
+      const rows = db.prepare(`SELECT * FROM ${table} ORDER BY criado_em`).all();
+      res.json(rows);
+    } catch (err) {
+      console.error(`[GET /api/${table}]`, err.message);
+      res.status(500).json({ error: err.message });
+    }
   });
 
   app.post(`/api/${table}`, (req, res) => {
-    const id = uid();
-    const values = cols.map(c => req.body[c] ?? null);
-    db.prepare(`INSERT INTO ${table} (id,${cols.join(',')}) VALUES (?,${placeholders})`).run(id, ...values);
-    const row = db.prepare(`SELECT * FROM ${table} WHERE id = ?`).get(id);
-    res.json(row);
+    try {
+      const id = uid();
+      const values = cols.map(c => req.body[c] ?? null);
+      db.prepare(`INSERT INTO ${table} (id,${cols.join(',')}) VALUES (?,${placeholders})`).run(id, ...values);
+      const row = db.prepare(`SELECT * FROM ${table} WHERE id = ?`).get(id);
+      res.json(row);
+    } catch (err) {
+      console.error(`[POST /api/${table}]`, err.message);
+      res.status(400).json({ error: err.message });
+    }
   });
 
   app.put(`/api/${table}/:id`, (req, res) => {
-    const values = cols.map(c => req.body[c] ?? null);
-    const setClause = cols.map(c => `${c} = ?`).join(',');
-    db.prepare(`UPDATE ${table} SET ${setClause} WHERE id = ?`).run(...values, req.params.id);
-    const row = db.prepare(`SELECT * FROM ${table} WHERE id = ?`).get(req.params.id);
-    res.json(row);
+    try {
+      const values = cols.map(c => req.body[c] ?? null);
+      const setClause = cols.map(c => `${c} = ?`).join(',');
+      db.prepare(`UPDATE ${table} SET ${setClause} WHERE id = ?`).run(...values, req.params.id);
+      const row = db.prepare(`SELECT * FROM ${table} WHERE id = ?`).get(req.params.id);
+      if (!row) return res.status(404).json({ error: 'Registro não encontrado.' });
+      res.json(row);
+    } catch (err) {
+      console.error(`[PUT /api/${table}/${req.params.id}]`, err.message);
+      res.status(400).json({ error: err.message });
+    }
   });
 
   app.delete(`/api/${table}/:id`, (req, res) => {
-    db.prepare(`DELETE FROM ${table} WHERE id = ?`).run(req.params.id);
-    res.json({ ok: true });
+    try {
+      db.prepare(`DELETE FROM ${table} WHERE id = ?`).run(req.params.id);
+      res.json({ ok: true });
+    } catch (err) {
+      console.error(`[DELETE /api/${table}/${req.params.id}]`, err.message);
+      res.status(400).json({ error: err.message });
+    }
   });
 }
 
@@ -83,6 +108,7 @@ simpleCrud('clientes', ['nome', 'tipo', 'documento', 'email', 'telefone', 'cep',
 simpleCrud('servicos', ['nome', 'detalhes', 'preco', 'unidade']);
 simpleCrud('agenda', ['titulo', 'data', 'hora', 'cliente_id', 'observacoes']);
 simpleCrud('financeiro', ['tipo', 'descricao', 'valor', 'data', 'categoria', 'pedido_id']);
+simpleCrud('recibos', ['cliente_id', 'descricao', 'valor', 'data', 'forma_pagamento']);
 
 /* ---------- pedidos (com itens) ---------- */
 function loadPedidoItens(pedidoId) {
@@ -90,35 +116,64 @@ function loadPedidoItens(pedidoId) {
 }
 
 app.get('/api/pedidos', (req, res) => {
-  const pedidos = db.prepare(`SELECT * FROM pedidos ORDER BY criado_em`).all();
-  const withItens = pedidos.map(p => ({ ...p, itens: loadPedidoItens(p.id) }));
-  res.json(withItens);
+  try {
+    const pedidos = db.prepare(`SELECT * FROM pedidos ORDER BY criado_em`).all();
+    const withItens = pedidos.map(p => ({ ...p, itens: loadPedidoItens(p.id) }));
+    res.json(withItens);
+  } catch (err) {
+    console.error('[GET /api/pedidos]', err.message);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 app.post('/api/pedidos', (req, res) => {
-  const id = uid();
-  const { cliente_id, data, status, itens } = req.body;
-  db.prepare(`INSERT INTO pedidos (id,cliente_id,data,status,total) VALUES (?,?,?,?,0)`).run(id, cliente_id, data, status);
-  const insItem = db.prepare(`INSERT INTO pedido_itens (id,pedido_id,servico_id,nome_item,preco_unitario,quantidade) VALUES (?,?,?,?,?,?)`);
-  for (const it of (itens || [])) insItem.run(uid(), id, it.servico_id || null, it.nome_item, it.preco_unitario, it.quantidade);
-  const pedido = db.prepare(`SELECT * FROM pedidos WHERE id = ?`).get(id);
-  res.json({ ...pedido, itens: loadPedidoItens(id) });
+  try {
+    const id = uid();
+    const { cliente_id, data, status, itens } = req.body;
+    db.prepare(`INSERT INTO pedidos (id,cliente_id,data,status,total) VALUES (?,?,?,?,0)`).run(id, cliente_id, data, status);
+    const insItem = db.prepare(`INSERT INTO pedido_itens (id,pedido_id,servico_id,nome_item,preco_unitario,quantidade) VALUES (?,?,?,?,?,?)`);
+    for (const it of (itens || [])) insItem.run(uid(), id, it.servico_id || null, it.nome_item, it.preco_unitario, it.quantidade);
+    const pedido = db.prepare(`SELECT * FROM pedidos WHERE id = ?`).get(id);
+    res.json({ ...pedido, itens: loadPedidoItens(id) });
+  } catch (err) {
+    console.error('[POST /api/pedidos]', err.message);
+    res.status(400).json({ error: err.message });
+  }
 });
 
 app.put('/api/pedidos/:id', (req, res) => {
-  const id = req.params.id;
-  const { cliente_id, data, status, itens } = req.body;
-  db.prepare(`UPDATE pedidos SET cliente_id=?, data=?, status=? WHERE id=?`).run(cliente_id, data, status, id);
-  db.prepare(`DELETE FROM pedido_itens WHERE pedido_id = ?`).run(id);
-  const insItem = db.prepare(`INSERT INTO pedido_itens (id,pedido_id,servico_id,nome_item,preco_unitario,quantidade) VALUES (?,?,?,?,?,?)`);
-  for (const it of (itens || [])) insItem.run(uid(), id, it.servico_id || null, it.nome_item, it.preco_unitario, it.quantidade);
-  const pedido = db.prepare(`SELECT * FROM pedidos WHERE id = ?`).get(id);
-  res.json({ ...pedido, itens: loadPedidoItens(id) });
+  try {
+    const id = req.params.id;
+    const { cliente_id, data, status, itens } = req.body;
+    db.prepare(`UPDATE pedidos SET cliente_id=?, data=?, status=? WHERE id=?`).run(cliente_id, data, status, id);
+    db.prepare(`DELETE FROM pedido_itens WHERE pedido_id = ?`).run(id);
+    const insItem = db.prepare(`INSERT INTO pedido_itens (id,pedido_id,servico_id,nome_item,preco_unitario,quantidade) VALUES (?,?,?,?,?,?)`);
+    for (const it of (itens || [])) insItem.run(uid(), id, it.servico_id || null, it.nome_item, it.preco_unitario, it.quantidade);
+    const pedido = db.prepare(`SELECT * FROM pedidos WHERE id = ?`).get(id);
+    if (!pedido) return res.status(404).json({ error: 'Pedido não encontrado.' });
+    res.json({ ...pedido, itens: loadPedidoItens(id) });
+  } catch (err) {
+    console.error(`[PUT /api/pedidos/${req.params.id}]`, err.message);
+    res.status(400).json({ error: err.message });
+  }
 });
 
 app.delete('/api/pedidos/:id', (req, res) => {
-  db.prepare(`DELETE FROM pedidos WHERE id = ?`).run(req.params.id);
-  res.json({ ok: true });
+  try {
+    db.prepare(`DELETE FROM pedidos WHERE id = ?`).run(req.params.id);
+    res.json({ ok: true });
+  } catch (err) {
+    console.error(`[DELETE /api/pedidos/${req.params.id}]`, err.message);
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// Middleware de erro genérico: garante que QUALQUER falha não tratada
+// (ex: JSON malformado no corpo da requisição) volte como JSON e não
+// como uma página HTML, que o frontend não consegue interpretar.
+app.use((err, req, res, next) => {
+  console.error('[erro não tratado]', err.message);
+  res.status(500).json({ error: err.message || 'Erro interno do servidor.' });
 });
 
 const PORT = process.env.PORT || 3000;

@@ -1,0 +1,19 @@
+[
+  {
+    "id": "ped_001",
+    "cliente_id": "cli_001",
+    "data": "2026-07-28",
+    "status": "Pendente",
+    "total": 120.0,
+    "itens": [
+      {
+        "id": "item_001",
+        "servico_id": "srv_001",
+        "nome_item": "Troca de óleo",
+        "preco_unitario": 120.0,
+        "quantidade": 1
+      }
+    ],
+    "criado_em": "2026-07-28T12:00:00Z"
+  }
+]

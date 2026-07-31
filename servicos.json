@@ -1,0 +1,12 @@
+[
+  {
+    "id": "fin_001",
+    "tipo": "Receita",
+    "descricao": "Pagamento pedido #ped_001",
+    "valor": 120.0,
+    "data": "2026-07-28",
+    "categoria": "Serviços",
+    "pedido_id": "ped_001",
+    "criado_em": "2026-07-28T12:00:00Z"
+  }
+]
